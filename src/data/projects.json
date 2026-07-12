@@ -6,13 +6,13 @@
       "featured": true,
       "tier": "legendary",
       "blurb": "One-line placeholder blurb for SGG — what it is and why it's cool.",
+      "description": "A longer paragraph shown only when the card is expanded.",
       "tech": ["Unity", "C#"],
       "hero": { "type": "video", "src": "projects/sgg/gameplay.mp4", "poster": "projects/sgg/SGG-title.png" },
       "gallery": [
         "projects/sgg/SGG-main-menu.png",
-        "projects/sgg/player-character-art.jpeg",
-        "projects/sgg/funkenstein-electric-traps.png",
         "projects/sgg/vampire-parrying.png",
+        "projects/sgg/funkenstein-electric-traps.png",
         "projects/sgg/trophy.jpeg"
       ],
       "links": [{ "label": "Devpost", "url": "#" }]
@@ -23,6 +23,7 @@
       "featured": false,
       "tier": "rare",
       "blurb": "One-line placeholder blurb for the ant colony simulation.",
+      "description": "A longer paragraph shown only when the card is expanded.",
       "tech": ["Placeholder", "Tech"],
       "hero": { "type": "image", "src": "projects/ant-colony-sim/base.png" },
       "gallery": [

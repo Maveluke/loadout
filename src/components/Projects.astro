@@ -1,6 +1,6 @@
 ---
 import { projects, asset } from "../lib/site";
-import Media from "./Media.astro";
+import MediaCarousel from "./MediaCarousel.astro";
 
 const featured = projects.filter((p) => p.featured);
 const others = projects.filter((p) => !p.featured);
@@ -14,9 +14,14 @@ const tierColor: Record<string, string> = {
 };
 const tierOf = (t: string) => tierColor[t] ?? tierColor.common;
 
-// Collapsed thumbnail: prefer an explicit `thumbnail`, else fall back to the
-// hero's poster, else the hero source itself.
-const thumbOf = (p: any) => p.thumbnail ?? p.hero.poster ?? p.hero.src;
+// Carousel media: explicit `media` array if present, else hero + gallery.
+const mediaOf = (p: any) =>
+  p.media && p.media.length
+    ? p.media
+    : [p.hero, ...((p.gallery ?? []) as string[]).map((s) => ({ type: "image", src: s }))];
+
+// Collapsed thumbnail: explicit `thumbnail`, else the first media item.
+const thumbOf = (p: any) => p.thumbnail ?? mediaOf(p)[0].poster ?? mediaOf(p)[0].src;
 ---
 
 <section class="arsenal">
@@ -29,16 +34,16 @@ const thumbOf = (p: any) => p.thumbnail ?? p.hero.poster ?? p.hero.src;
   {/* Featured / Legendary card */}
   {featured.map((p) => (
     <article id="featured" class="card featured" data-tier={p.tier} style={`--tier:${tierOf(p.tier)}`}>
-      <div class="asset">
+      <MediaCarousel media={mediaOf(p)} name={p.name}>
         <span class="rarity-badge">
           <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor" aria-hidden="true"><path d="M2.5 7.5 7 11l5-6.5L17 11l4.5-3.5-1.8 11.3a1 1 0 0 1-1 .82H5.3a1 1 0 0 1-1-.82L2.5 7.5Z"/></svg>
           {p.tier} · Featured
         </span>
-        <Media hero={p.hero} name={p.name} autoplay />
-      </div>
+      </MediaCarousel>
       <div class="body">
         <h3 class="proj-name">{p.name}</h3>
         <p class="proj-blurb">{p.blurb}</p>
+        {(p as any).description && <p class="proj-desc">{(p as any).description}</p>}
         <div class="tags">
           {p.tech.map((t) => (
             <span class="tag">
@@ -92,12 +97,10 @@ const thumbOf = (p: any) => p.thumbnail ?? p.hero.poster ?? p.hero.src;
           </div>
         </div>
 
-        {/* Expanded: featured-style layout — media first, then body */}
+        {/* Expanded: featured-style layout — carousel first, then body */}
         <div class="card-more" id={`more-${p.slug}`}>
           <div class="clip">
-            <div class="asset exp-asset">
-              <Media hero={p.hero} name={p.name} />
-            </div>
+            <MediaCarousel media={mediaOf(p)} name={p.name} />
             <div class="body">
               <div class="body-top">
                 <div class="card-top">
@@ -109,6 +112,7 @@ const thumbOf = (p: any) => p.thumbnail ?? p.hero.poster ?? p.hero.src;
                 </button>
               </div>
               <p class="proj-blurb">{p.blurb}</p>
+              {(p as any).description && <p class="proj-desc">{(p as any).description}</p>}
               <div class="tags">
                 {p.tech.map((t) => (
                   <span class="tag">
@@ -169,14 +173,6 @@ const thumbOf = (p: any) => p.thumbnail ?? p.hero.poster ?? p.hero.src;
     overflow: hidden;
   }
 
-  /* Shared 16:9 asset frame (featured + expanded others) */
-  .asset {
-    position: relative;
-    aspect-ratio: 16 / 9;
-    background: #0b0f12;
-    overflow: hidden;
-  }
-
   .proj-name {
     font-size: 1.4rem;
     font-weight: 700;
@@ -189,6 +185,14 @@ const thumbOf = (p: any) => p.thumbnail ?? p.hero.poster ?? p.hero.src;
     line-height: 1.55;
   }
   .proj-blurb.sm { margin-top: 0.25rem; font-size: 0.9rem; }
+  .proj-desc {
+    margin-top: 0.75rem;
+    max-width: 46rem;
+    color: var(--text);
+    opacity: 0.85;
+    font-size: 0.95rem;
+    line-height: 1.65;
+  }
 
   /* Code-style "mod chip" tech tags */
   .tags {
@@ -253,7 +257,7 @@ const thumbOf = (p: any) => p.thumbnail ?? p.hero.poster ?? p.hero.src;
     position: absolute;
     top: 0.9rem;
     left: 0.9rem;
-    z-index: 2;
+    z-index: 4;
     display: inline-flex;
     align-items: center;
     gap: 0.35rem;
@@ -365,20 +369,13 @@ const thumbOf = (p: any) => p.thumbnail ?? p.hero.poster ?? p.hero.src;
     background: color-mix(in srgb, var(--tier) 10%, transparent);
   }
 
-  /* Expanded asset reveal — fades/scales in after the card opens */
-  .exp-asset {
+  /* Expanded content fades in as the card opens */
+  .card-more :global(.carousel),
+  .card-more .body {
     opacity: 0;
-    transform: scale(1.04);
-    transition: opacity 0.45s ease, transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+    transition: opacity 0.4s ease 0.1s;
   }
-  .proj-card.open .exp-asset {
-    opacity: 1;
-    transform: none;
-  }
-  .proj-card .card-more .body {
-    opacity: 0;
-    transition: opacity 0.4s ease 0.12s;
-  }
+  .proj-card.open .card-more :global(.carousel),
   .proj-card.open .card-more .body { opacity: 1; }
 
   @media (max-width: 767px) {
@@ -389,17 +386,15 @@ const thumbOf = (p: any) => p.thumbnail ?? p.hero.poster ?? p.hero.src;
 
 <script>
   // Accordion: one open at a time. The compact row collapses as the
-  // featured-style body expands. Videos play on open, pause/reset on close.
+  // featured-style body expands. The expanded carousel is activated/paused
+  // via events so its videos + autoplay only run while the card is open.
   const cards = document.querySelectorAll<HTMLElement>(".proj-card");
 
   function setOpen(card: HTMLElement, open: boolean) {
     card.classList.toggle("open", open);
     card.querySelector(".card-head")?.setAttribute("aria-expanded", String(open));
-    const vid = card.querySelector<HTMLVideoElement>("video[data-video]");
-    if (vid) {
-      if (open) vid.play().catch(() => {});
-      else { vid.pause(); vid.currentTime = 0; }
-    }
+    const carousel = card.querySelector(".card-more .carousel");
+    carousel?.dispatchEvent(new CustomEvent(open ? "carousel:activate" : "carousel:deactivate"));
   }
 
   cards.forEach((card) => {

@@ -1,0 +1,281 @@
+---
+// A swipeable 16:9 media carousel shared by the featured card and the expanded
+// "other" cards. Native scroll-snap for swipe, arrows + dots for pointer, an
+// optional gentle autoplay (config `features.carouselAutoplay`) that pauses on
+// interaction and is disabled under prefers-reduced-motion. A <slot /> renders
+// overlays (e.g. the rarity badge).
+//
+// Autoplay dwell is content-aware: image slides advance on a short timer, a
+// video slide holds until it plays through (capped) before advancing.
+import Media from "./Media.astro";
+import { config } from "../lib/site";
+
+interface Props {
+  media: { type: string; src: string; poster?: string }[];
+  name: string;
+}
+const { media, name } = Astro.props;
+const multi = media.length > 1;
+const autoAdvance = (config.features as any).carouselAutoplay ?? true;
+---
+
+<div class="carousel" data-auto={autoAdvance ? "1" : "0"}>
+  <div class="track" tabindex="0">
+    {media.map((m) => (
+      <div class="slide"><Media hero={m} name={name} /></div>
+    ))}
+  </div>
+
+  <slot />
+
+  {multi && (
+    <>
+      <button type="button" class="cnav prev" aria-label="Previous image">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+      </button>
+      <button type="button" class="cnav next" aria-label="Next image">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+      </button>
+      <div class="counter"><span class="cur">1</span> / {media.length}</div>
+      <div class="dots" aria-label="Choose image">
+        {media.map((_, i) => (
+          <button type="button" class="dot" data-i={i} aria-label={`Image ${i + 1}`} aria-current={i === 0 ? "true" : "false"}></button>
+        ))}
+      </div>
+    </>
+  )}
+</div>
+
+<style>
+  .carousel {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    background: #0b0f12;
+    overflow: hidden;
+  }
+  .track {
+    display: flex;
+    height: 100%;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    outline: none;
+  }
+  .track::-webkit-scrollbar { display: none; }
+  .slide {
+    flex: 0 0 100%;
+    height: 100%;
+    scroll-snap-align: center;
+  }
+
+  .cnav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    color: #fff;
+    background: rgba(10, 14, 16, 0.55);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    backdrop-filter: blur(6px);
+    cursor: pointer;
+    z-index: 3;
+    opacity: 0;
+    transition: opacity 0.18s ease, background-color 0.16s ease;
+  }
+  .carousel:hover .cnav,
+  .cnav:focus-visible { opacity: 1; }
+  .cnav:hover { background: rgba(10, 14, 16, 0.75); }
+  .prev { left: 0.6rem; }
+  .next { right: 0.6rem; }
+
+  .counter {
+    position: absolute;
+    top: 0.6rem;
+    right: 0.6rem;
+    z-index: 3;
+    padding: 0.2rem 0.5rem;
+    border-radius: 999px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #e9efeb;
+    background: rgba(10, 14, 16, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    backdrop-filter: blur(6px);
+  }
+
+  .dots {
+    position: absolute;
+    bottom: 0.6rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 0.4rem;
+    z-index: 3;
+  }
+  .dot {
+    width: 7px;
+    height: 7px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    cursor: pointer;
+    background: rgba(255, 255, 255, 0.45);
+    transition: background-color 0.16s ease, transform 0.16s ease;
+  }
+  .dot[aria-current="true"] {
+    background: #fff;
+    transform: scale(1.35);
+  }
+
+  /* Touch devices: show arrows (no hover to reveal them) */
+  @media (hover: none) {
+    .cnav { opacity: 0.85; }
+  }
+</style>
+
+<script>
+  const RM = window.matchMedia("(prefers-reduced-motion: reduce)");
+  const IMAGE_MS = 6000;      // dwell on an image slide
+  const VIDEO_CAP_MS = 14000; // max dwell on a video slide
+  const VIDEO_FALLBACK_MS = 10000; // used until the video's duration is known
+
+  document.querySelectorAll<HTMLElement>(".carousel").forEach((root) => {
+    const track = root.querySelector<HTMLElement>(".track")!;
+    const slides = Array.from(root.querySelectorAll<HTMLElement>(".slide"));
+    const dots = Array.from(root.querySelectorAll<HTMLButtonElement>(".dot"));
+    const curEl = root.querySelector<HTMLElement>(".cur");
+    const n = slides.length;
+    if (n === 0) return;
+
+    const autoOn = root.dataset.auto === "1" && n > 1 && !RM.matches;
+    const inAccordion = !!root.closest(".card-more");
+
+    let index = 0;
+    let expanded = !inAccordion; // featured card is always expanded
+    let onScreen = false;
+    let timer: number | null = null;
+    let resumeT: number | null = null;
+
+    const active = () => expanded && onScreen;
+    const behavior = (): ScrollBehavior => (RM.matches ? "auto" : "smooth");
+
+    // Only scroll — the observers below update `index` + the dots/counter,
+    // so a single source of truth (scroll position) drives the UI.
+    function goTo(i: number) {
+      const target = (i + n) % n;
+      track.scrollTo({ left: target * track.clientWidth, behavior: behavior() });
+    }
+    function render() {
+      dots.forEach((d, i) => d.setAttribute("aria-current", String(i === index)));
+      if (curEl) curEl.textContent = String(index + 1);
+    }
+    function playActive() {
+      slides.forEach((s, i) => {
+        const v = s.querySelector<HTMLVideoElement>("video[data-video]");
+        if (!v) return;
+        if (i === index && active()) v.play().catch(() => {});
+        else { v.pause(); if (i !== index) v.currentTime = 0; }
+      });
+    }
+    function clearNext() { if (timer != null) { clearTimeout(timer); timer = null; } }
+    // Content-aware dwell: hold on a video until it plays through (capped).
+    function scheduleNext() {
+      clearNext();
+      if (!autoOn || !active()) return;
+      const v = slides[index].querySelector<HTMLVideoElement>("video[data-video]");
+      let dwell = IMAGE_MS;
+      if (v) {
+        const ms = isFinite(v.duration) && v.duration > 0 ? v.duration * 1000 : VIDEO_FALLBACK_MS;
+        dwell = Math.min(ms, VIDEO_CAP_MS);
+      }
+      timer = window.setTimeout(() => goTo(index + 1), dwell);
+    }
+    function pauseThenResume() {
+      clearNext();
+      if (resumeT != null) clearTimeout(resumeT);
+      if (autoOn) resumeT = window.setTimeout(() => { if (active()) scheduleNext(); }, 8000);
+    }
+    function setIndex(i: number) {
+      if (i === index) return;
+      index = i;
+      render();
+      playActive();
+      scheduleNext();
+    }
+    function update() {
+      render();
+      playActive();
+      if (active()) scheduleNext(); else clearNext();
+    }
+
+    // Which slide is centred → active index
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting && e.intersectionRatio >= 0.6) {
+            const i = slides.indexOf(e.target as HTMLElement);
+            if (i >= 0) setIndex(i);
+          }
+        });
+      },
+      { root: track, threshold: 0.6 }
+    );
+    slides.forEach((s) => io.observe(s));
+
+    // A video reveals its real duration only after metadata loads — reschedule.
+    slides.forEach((s) => {
+      const v = s.querySelector<HTMLVideoElement>("video[data-video]");
+      v?.addEventListener("loadedmetadata", () => {
+        if (slides[index] === s && active()) scheduleNext();
+      });
+    });
+
+    // Viewport visibility gates all activity
+    new IntersectionObserver(
+      ([e]) => { onScreen = e.isIntersecting; update(); },
+      { threshold: 0.3 }
+    ).observe(root);
+
+    // Accordion expand/collapse hooks (dispatched by Projects.astro)
+    root.addEventListener("carousel:activate", () => { expanded = true; onScreen = true; update(); });
+    root.addEventListener("carousel:deactivate", () => { expanded = false; update(); });
+
+    // Controls
+    root.querySelector(".prev")?.addEventListener("click", () => { pauseThenResume(); goTo(index - 1); });
+    root.querySelector(".next")?.addEventListener("click", () => { pauseThenResume(); goTo(index + 1); });
+    dots.forEach((d) =>
+      d.addEventListener("click", () => { pauseThenResume(); goTo(Number(d.dataset.i)); })
+    );
+    track.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowLeft") { pauseThenResume(); goTo(index - 1); }
+      else if (e.key === "ArrowRight") { pauseThenResume(); goTo(index + 1); }
+    });
+
+    // Pause autoplay while the user is interacting
+    root.addEventListener("pointerenter", clearNext);
+    root.addEventListener("pointerleave", () => { if (active()) scheduleNext(); });
+    root.addEventListener("touchstart", pauseThenResume, { passive: true });
+    root.addEventListener("focusin", clearNext);
+    root.addEventListener("focusout", () => { if (active()) scheduleNext(); });
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) clearNext(); else if (active()) scheduleNext();
+    });
+
+    // Fallback index sync after a manual swipe settles
+    let st: number | null = null;
+    track.addEventListener("scroll", () => {
+      if (st != null) clearTimeout(st);
+      st = window.setTimeout(() => {
+        const i = Math.round(track.scrollLeft / track.clientWidth);
+        setIndex(i);
+      }, 120);
+    }, { passive: true });
+
+    render();
+  });
+</script>

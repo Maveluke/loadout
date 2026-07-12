@@ -6,8 +6,13 @@
       "featured": true,
       "tier": "legendary",
       "blurb": "One-line placeholder blurb for the featured project.",
+      "description": "A longer paragraph with more detail: what the project is, your role, the interesting technical or design problems you solved, and the outcome. Two to four sentences reads well here.",
       "tech": ["Engine", "Language"],
-      "hero": { "type": "video", "src": "projects/example/gameplay.mp4", "poster": "projects/example/title.png" },
+      "media": [
+        { "type": "video", "src": "projects/example/gameplay.mp4", "poster": "projects/example/title.png" },
+        { "type": "image", "src": "projects/example/shot-1.png" },
+        { "type": "image", "src": "projects/example/shot-2.png" }
+      ],
       "links": [{ "label": "Devpost", "url": "#" }]
     },
     {
@@ -16,9 +21,13 @@
       "featured": false,
       "tier": "rare",
       "blurb": "One-line placeholder blurb.",
+      "description": "A longer paragraph shown only when the card is expanded.",
       "tech": ["Tool", "Language"],
       "thumbnail": "projects/example/thumb.png",
-      "hero": { "type": "image", "src": "projects/example/expanded.png" },
+      "media": [
+        { "type": "image", "src": "projects/example/shot-1.png" },
+        { "type": "image", "src": "projects/example/shot-2.png" }
+      ],
       "links": []
     }
   ]

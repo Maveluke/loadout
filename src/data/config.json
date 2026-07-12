@@ -5,6 +5,7 @@
   "features": {
     "konami": true,
     "xpHud": true,
-    "achievements": true
+    "achievements": true,
+    "carouselAutoplay": true
   }
 }
