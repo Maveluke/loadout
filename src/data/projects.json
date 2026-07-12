@@ -1,0 +1,36 @@
+{
+  "projects": [
+    {
+      "slug": "sgg",
+      "name": "SGG",
+      "featured": true,
+      "tier": "legendary",
+      "blurb": "One-line placeholder blurb for SGG — what it is and why it's cool.",
+      "tech": ["Unity", "C#"],
+      "hero": { "type": "video", "src": "projects/sgg/gameplay.mp4", "poster": "projects/sgg/SGG-title.png" },
+      "gallery": [
+        "projects/sgg/SGG-main-menu.png",
+        "projects/sgg/player-character-art.jpeg",
+        "projects/sgg/funkenstein-electric-traps.png",
+        "projects/sgg/vampire-parrying.png",
+        "projects/sgg/trophy.jpeg"
+      ],
+      "links": [{ "label": "Devpost", "url": "#" }]
+    },
+    {
+      "slug": "ant-colony-sim",
+      "name": "Ant Colony Simulation",
+      "featured": false,
+      "tier": "rare",
+      "blurb": "One-line placeholder blurb for the ant colony simulation.",
+      "tech": ["Placeholder", "Tech"],
+      "hero": { "type": "image", "src": "projects/ant-colony-sim/base.png" },
+      "gallery": [
+        "projects/ant-colony-sim/food-pheromone.png",
+        "projects/ant-colony-sim/spiders.png",
+        "projects/ant-colony-sim/attacks.png"
+      ],
+      "links": []
+    }
+  ]
+}

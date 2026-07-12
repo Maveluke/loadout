@@ -1,0 +1,310 @@
+---
+import { profile, asset } from "../lib/site";
+
+const { name, tagline, bio, socials, profileImage, resumes } = profile;
+
+// Icon lookup for the resume "class" cards.
+const classIcon: Record<string, "sword" | "keyboard"> = {
+  "Game Dev": "sword",
+  "Software Engineer": "keyboard",
+};
+---
+
+<section id="about" class="hero">
+  <video
+    class="hero-video"
+    autoplay
+    muted
+    loop
+    playsinline
+    preload="auto"
+    aria-hidden="true"
+  >
+    <source src={asset("hero.mp4")} type="video/mp4" />
+  </video>
+  <div class="hero-overlay" aria-hidden="true"></div>
+
+  <div class="hero-inner">
+    <div class="hero-grid">
+      {/* Left: intro text */}
+      <div class="intro reveal">
+        <p class="eyebrow">Loadout</p>
+        <h1 class="title">Hi, I'm <span class="accent">{name}</span></h1>
+        <p class="tagline">{tagline}</p>
+        <p class="bio">{bio}</p>
+      </div>
+
+      {/* Right: profile picture + socials */}
+      <div class="who reveal delay-1">
+        <img class="pp" src={asset(profileImage)} alt={`${name} portrait`} width="176" height="176" />
+        <p class="socials-prompt">Check out my socials</p>
+        <div class="socials">
+          <a class="social" href={socials.github} target="_blank" rel="noopener" aria-label="GitHub">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M12 .5A11.5 11.5 0 0 0 .5 12a11.5 11.5 0 0 0 7.86 10.92c.58.1.79-.25.79-.56v-2c-3.2.7-3.87-1.36-3.87-1.36-.53-1.34-1.3-1.7-1.3-1.7-1.06-.72.08-.71.08-.71 1.17.08 1.79 1.2 1.79 1.2 1.04 1.79 2.73 1.27 3.4.97.1-.76.41-1.27.74-1.56-2.55-.29-5.24-1.28-5.24-5.68 0-1.25.45-2.28 1.19-3.08-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11 11 0 0 1 5.8 0c2.2-1.5 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.8 1.19 1.83 1.19 3.08 0 4.41-2.69 5.38-5.25 5.67.42.36.8 1.08.8 2.18v3.23c0 .31.21.67.8.56A11.5 11.5 0 0 0 23.5 12 11.5 11.5 0 0 0 12 .5Z"/></svg>
+          </a>
+          <a class="social" href={socials.linkedin} target="_blank" rel="noopener" aria-label="LinkedIn">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.03-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.42v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28ZM5.34 7.43a2.07 2.07 0 1 1 0-4.14 2.07 2.07 0 0 1 0 4.14ZM7.12 20.45H3.55V9h3.57v11.45ZM22.23 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.22.79 24 1.77 24h20.46c.98 0 1.77-.78 1.77-1.73V1.73C24 .77 23.21 0 22.23 0Z"/></svg>
+          </a>
+          <a class="social" href={`mailto:${profile.email}`} aria-label="Email">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m4 7 8 6 8-6"/></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    {/* Resume "class select" bar */}
+    <div class="loadout reveal delay-2">
+      <span class="loadout-label">Select class · download resume</span>
+      <div class="classes">
+        {resumes.map((r) => (
+          <div class="class-card">
+            <a class="class-open" href={asset(r.file)} target="_blank" rel="noopener">
+              <span class="class-icon">
+                {classIcon[r.class] === "sword" ? (
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M14.5 3H21v6.5L9 21.5 2.5 15 14.5 3Z"/><path d="m7 14 3 3M2.5 21l3-3"/></svg>
+                ) : (
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="2.5" y="6" width="19" height="12" rx="2"/><path d="M6 9.5h.01M9 9.5h.01M12 9.5h.01M15 9.5h.01M18 9.5h.01M7 14h10"/></svg>
+                )}
+              </span>
+              <span class="class-text">
+                <span class="class-name">{r.class}</span>
+                <span class="class-flavor">{r.flavor}</span>
+              </span>
+            </a>
+            <a class="class-dl" href={asset(r.file)} download aria-label={`Download ${r.class} resume`}>
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M4 19h16"/></svg>
+            </a>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .hero {
+    position: relative;
+    min-height: 100svh;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+  }
+  .hero-video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 0;
+    background: #0b0f12;
+  }
+  .hero-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background:
+      linear-gradient(180deg, rgba(6, 10, 12, 0.55) 0%, rgba(6, 10, 12, 0.35) 40%, rgba(6, 10, 12, 0.7) 100%),
+      radial-gradient(120% 80% at 20% 30%, rgba(6, 10, 12, 0.2), rgba(6, 10, 12, 0.65));
+  }
+  .hero-inner {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    max-width: 72rem;
+    margin: 0 auto;
+    padding: 6rem 1.5rem 2.5rem;
+    color: #f4f7f5;
+  }
+  .hero-grid {
+    display: grid;
+    grid-template-columns: 1.7fr 1fr;
+    gap: 2.5rem;
+    align-items: center;
+  }
+
+  /* Left */
+  .eyebrow {
+    text-transform: uppercase;
+    letter-spacing: 0.3em;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 0.9rem;
+  }
+  .title {
+    font-size: clamp(2.2rem, 5vw, 3.8rem);
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+  }
+  .title .accent {
+    color: var(--accent);
+  }
+  .tagline {
+    margin-top: 1rem;
+    font-size: clamp(1.05rem, 2vw, 1.35rem);
+    font-weight: 500;
+    color: #d8ded9;
+  }
+  .bio {
+    margin-top: 1rem;
+    max-width: 34rem;
+    font-size: 1rem;
+    line-height: 1.6;
+    color: #bcc4bf;
+  }
+
+  /* Right */
+  .who {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  .pp {
+    width: 11rem;
+    height: 11rem;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid color-mix(in srgb, var(--accent) 60%, transparent);
+    box-shadow: 0 0 0 6px rgba(255, 255, 255, 0.06), 0 12px 40px rgba(0, 0, 0, 0.4);
+  }
+  .socials-prompt {
+    margin-top: 1.1rem;
+    font-size: 0.8rem;
+    color: #bcc4bf;
+  }
+  .socials {
+    margin-top: 0.6rem;
+    display: flex;
+    gap: 0.6rem;
+  }
+  .social {
+    display: grid;
+    place-items: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    color: #e9efeb;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    transition: transform 0.16s ease, color 0.16s ease, background-color 0.16s ease;
+  }
+  .social:hover {
+    transform: translateY(-2px);
+    color: var(--accent);
+    background: rgba(255, 255, 255, 0.14);
+  }
+
+  /* Loadout / class-select bar */
+  .loadout {
+    margin-top: 3rem;
+    padding: 1rem;
+    border-radius: 18px;
+    background: rgba(10, 14, 16, 0.55);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(8px);
+  }
+  .loadout-label {
+    display: block;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: #9aa39d;
+    margin-bottom: 0.75rem;
+    padding-left: 0.25rem;
+  }
+  .classes {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+  }
+  .class-card {
+    display: flex;
+    align-items: stretch;
+    gap: 0.4rem;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    overflow: hidden;
+    transition: border-color 0.18s ease, background-color 0.18s ease, transform 0.18s ease;
+  }
+  .class-card:hover {
+    transform: translateY(-2px);
+    border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+    background: rgba(255, 255, 255, 0.08);
+  }
+  .class-open {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.8rem 0.9rem;
+    flex: 1;
+    color: #f4f7f5;
+    min-width: 0;
+  }
+  .class-icon {
+    display: grid;
+    place-items: center;
+    width: 38px;
+    height: 38px;
+    flex-shrink: 0;
+    border-radius: 10px;
+    color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 14%, transparent);
+  }
+  .class-text {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+  .class-name {
+    font-weight: 700;
+    font-size: 0.98rem;
+  }
+  .class-flavor {
+    font-size: 0.75rem;
+    color: #a9b1ac;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .class-dl {
+    display: grid;
+    place-items: center;
+    width: 46px;
+    flex-shrink: 0;
+    color: #cdd4cf;
+    border-left: 1px solid rgba(255, 255, 255, 0.1);
+    transition: color 0.16s ease, background-color 0.16s ease;
+  }
+  .class-dl:hover {
+    color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 12%, transparent);
+  }
+
+  /* Entrance animations */
+  .reveal {
+    animation: reveal-up 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  .delay-1 { animation-delay: 0.12s; }
+  .delay-2 { animation-delay: 0.24s; }
+  @keyframes reveal-up {
+    from { opacity: 0; transform: translateY(18px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Mobile */
+  @media (max-width: 767px) {
+    .hero-inner { padding: 5rem 1.25rem 2rem; }
+    .hero-grid {
+      grid-template-columns: 1fr;
+      gap: 2rem;
+    }
+    .who { order: -1; }
+    .pp { width: 8.5rem; height: 8.5rem; }
+    .bio { margin-left: auto; margin-right: auto; }
+    .intro { text-align: center; }
+    .classes { grid-template-columns: 1fr; }
+  }
+</style>

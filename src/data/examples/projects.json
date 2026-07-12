@@ -1,0 +1,25 @@
+{
+  "projects": [
+    {
+      "slug": "featured-project",
+      "name": "Featured Project Title",
+      "featured": true,
+      "tier": "legendary",
+      "blurb": "One-line placeholder blurb for the featured project.",
+      "tech": ["Engine", "Language"],
+      "hero": { "type": "video", "src": "projects/example/gameplay.mp4", "poster": "projects/example/title.png" },
+      "links": [{ "label": "Devpost", "url": "#" }]
+    },
+    {
+      "slug": "second-project",
+      "name": "Second Project Title",
+      "featured": false,
+      "tier": "rare",
+      "blurb": "One-line placeholder blurb.",
+      "tech": ["Tool", "Language"],
+      "thumbnail": "projects/example/thumb.png",
+      "hero": { "type": "image", "src": "projects/example/expanded.png" },
+      "links": []
+    }
+  ]
+}

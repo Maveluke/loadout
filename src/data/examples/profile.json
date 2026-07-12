@@ -1,0 +1,25 @@
+{
+  "name": "Your Name",
+  "role": "Game Programmer",
+  "tagline": "I don't just play games, I build them.",
+  "bio": "Placeholder bio — a few lines about who you are, what you build, and what you're into. Keep it to 2–4 sentences.",
+  "location": "City, Country",
+  "email": "you@example.com",
+  "socials": {
+    "github": "https://github.com/your-handle",
+    "linkedin": "https://linkedin.com/in/your-handle"
+  },
+  "profileImage": "pp.jpg",
+  "resumes": [
+    {
+      "class": "Game Dev",
+      "file": "resumes/resume_gamedev.pdf",
+      "flavor": "Gameplay systems · engines · tools"
+    },
+    {
+      "class": "Software Engineer",
+      "file": "resumes/resume.pdf",
+      "flavor": "Full-stack · backend · data"
+    }
+  ]
+}

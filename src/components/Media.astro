@@ -1,0 +1,39 @@
+---
+// Renders a 16:9 project asset (video or image). Shared by the featured card
+// and the expanded "other" cards so both look identical in size/position.
+import { asset } from "../lib/site";
+
+interface Props {
+  hero: { type: string; src: string; poster?: string };
+  name: string;
+  autoplay?: boolean;
+}
+const { hero, name, autoplay = false } = Astro.props;
+const poster = hero.poster ? asset(hero.poster) : undefined;
+---
+
+{hero.type === "video" ? (
+  <video
+    class="asset-el"
+    muted
+    loop
+    playsinline
+    autoplay={autoplay}
+    preload={autoplay ? "metadata" : "none"}
+    poster={poster}
+    data-video
+  >
+    <source src={asset(hero.src)} type="video/mp4" />
+  </video>
+) : (
+  <img class="asset-el" src={asset(hero.src)} alt={name} loading="lazy" />
+)}
+
+<style>
+  .asset-el {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+</style>

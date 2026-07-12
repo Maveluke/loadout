@@ -1,0 +1,10 @@
+{
+  "contact": {
+    "web3formsAccessKey": "PASTE-YOUR-ACCESS-KEY-HERE"
+  },
+  "features": {
+    "konami": true,
+    "xpHud": true,
+    "achievements": true
+  }
+}

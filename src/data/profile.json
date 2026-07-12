@@ -1,0 +1,25 @@
+{
+  "name": "Maverick Luke",
+  "role": "Game Programmer",
+  "tagline": "I don't just play games, I build them.",
+  "bio": "I am a passionate game programmer with a strong background in software engineering. I love creating immersive gaming experiences and have a keen interest in gameplay systems, engines, and tools. With a solid foundation in full-stack development, I bring a unique perspective to game development, ensuring efficient cross-disciplinary collaboration.",
+  "location": "Toronto, Canada",
+  "email": "maveluk.cy@gmail.com",
+  "socials": {
+    "github": "https://github.com/Maveluke",
+    "linkedin": "https://linkedin.com/in/maveluke"
+  },
+  "profileImage": "pp.jpg",
+  "resumes": [
+    {
+      "class": "Game Dev",
+      "file": "resumes/resume_gamedev.pdf",
+      "flavor": "Gameplay systems · engines · tools"
+    },
+    {
+      "class": "Software Engineer",
+      "file": "resumes/resume.pdf",
+      "flavor": "Full-stack · backend · data"
+    }
+  ]
+}
